@@ -1,3 +1,112 @@
-/* Simplified Phaser Tetris with intro logic */
-const FIRST_RUN_KEY = 'tfa_first_run_v1';
-function showSplashThenStart(){ const shown = localStorage.getItem(FIRST_RUN_KEY); const splash = document.getElementById('splash'); const canvas = document.getElementById('logoCanvas'); const ctx = canvas.getContext('2d'); const img = new Image(); img.src='assets/obomsoft_logo_2048.png'; img.onload = ()=>{ let t0 = performance.now(); const sound = new Audio('assets/sound_id.wav'); function frame(t){ const dt=(t-t0)/1000; ctx.clearRect(0,0,canvas.width,canvas.height); const g=ctx.createLinearGradient(0,0,0,canvas.height); g.addColorStop(0,'#8fd3f4'); g.addColorStop(1,'#f6a6ff'); ctx.fillStyle=g; ctx.fillRect(0,0,canvas.width,canvas.height); const w=canvas.width*0.9, h=canvas.height*0.7; ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h); for(let i=0;i<20;i++){ const x=(canvas.width*0.15)+((i*37)%canvas.width)*0.9; const y=(canvas.height*0.2)+((i*23)%canvas.height)*0.6*Math.abs(Math.sin(dt+i)); ctx.fillStyle='rgba(255,240,200,'+(0.5*Math.abs(Math.sin(dt+i))+0.2)+')'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); } ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(canvas.width*0.2,canvas.height*0.45,canvas.width*0.6,6*Math.abs(Math.sin(dt*3))); if(dt<3 && !shown){ if(dt>0.25 && sound.paused){ sound.play().catch(()=>{}); } requestAnimationFrame(frame); } else { splash.style.display='none'; document.getElementById('gameContainer').style.display='block'; if(!shown) localStorage.setItem(FIRST_RUN_KEY,'1'); startPhaserGame(); } } if(shown){ splash.style.display='none'; document.getElementById('gameContainer').style.display='block'; startPhaserGame(); } else requestAnimationFrame(frame); }; } showSplashThenStart(); function startPhaserGame(){ const config={type:Phaser.AUTO,parent:'game',width:320,height:640,backgroundColor:'#071127',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:{preload,create,update}}; const game=new Phaser.Game(config); let dropTimer=0,dropInterval=800; let grid,current,score=0; function preload(){ this.load.image('bg1','assets/bg_1.png'); this.load.image('bg2','assets/bg_2.png'); this.load.image('bg3','assets/bg_3.png'); this.load.image('block','assets/obomsoft_logo_512.png'); this.load.audio('music1','assets/music1.wav'); this.load.audio('music2','assets/music2.wav'); this.load.audio('music3','assets/music3.wav'); } function create(){ this.add.rectangle(160,320,320,640,0x071127); const tracks=['music1','music2','music3']; let idx=0; const bgm=this.sound.add(tracks[idx],{loop:false,volume:0.5}); bgm.play(); bgm.on('complete',()=>{ idx=(idx+1)%tracks.length; this.sound.add(tracks[idx],{loop:false,volume:0.5}).play(); }); this.add.text(10,10,'Tetris For All',{font:'20px Arial',fill:'#ffffff'}); this.add.text(10,34,'Score: 0',{font:'16px Arial',fill:'#ffffff'}).setName('scoreText'); grid=Array.from({length:20},()=>Array(10).fill(0)); spawnPiece(); this.input.keyboard.on('keydown',(e)=>{ if(e.key==='ArrowLeft') current.x=Math.max(0,current.x-1); if(e.key==='ArrowRight') current.x=Math.min(9,current.x+1); if(e.key==='ArrowDown') current.y+=1; if(e.key==='ArrowUp') current.rot=(current.rot+1)%4; }); } function update(time,delta){ dropTimer+=delta; if(dropTimer>dropInterval){ current.y+=1; dropTimer=0; } if(current.y>=20){ for(let ry=0;ry<current.h;ry++) for(let rx=0;rx<current.w;rx++) if(current.shape[ry]&&current.shape[ry][rx]){ const gx=current.x+rx, gy=current.y+ry; if(gy>=0&&gy<20&&gx>=0&&gx<10) grid[gy][gx]=1; } for(let y=19;y>=0;y--){ if(grid[y].every(v=>v===1)){ grid.splice(y,1); grid.unshift(Array(10).fill(0)); score+=100; } } const scoreText=this.scene.scenes[0].children.getByName('scoreText'); if(scoreText) scoreText.setText('Score: '+score); spawnPiece(); } renderGrid(this); } function spawnPiece(){ current={x:4,y:0,w:2,h:2,shape:[[1,1],[1,1]],rot:0}; } function renderGrid(scene){ scene.children.list.filter(c=>c.type==='Rectangle'&&c.name==='block').forEach(c=>c.destroy()); for(let y=0;y<20;y++) for(let x=0;x<10;x++) if(grid[y][x]){ const rect=scene.add.rectangle(16+x*32,16+y*32,30,30,0xffcc00); rect.setOrigin(0); rect.name='block'; } scene.children.list.filter(c=>c.type==='Rectangle'&&c.name==='piece').forEach(c=>c.destroy()); for(let ry=0;ry<current.h;ry++) for(let rx=0;rx<current.w;rx++) if(current.shape[ry][rx]){ const rect=scene.add.rectangle(16+(current.x+rx)*32,16+(current.y+ry)*32,30,30,0x66ccff); rect.setOrigin(0); rect.name='piece'; } } }
+// --- START: audio-friendly splash (copy/paste toda esta função) ---
+const FIRST_RUN_KEY = 'tfa_first_run_shown_v1';
+
+async function tryPlayAudio(audioEl){
+  try{
+    await audioEl.play();
+    return true;
+  }catch(e){
+    // autoplay blocked; return false so we can show a CTA button
+    return false;
+  }
+}
+
+function showSplashThenStart() {
+  const shown = localStorage.getItem(FIRST_RUN_KEY);
+  const splash = document.getElementById('splash');
+  const canvas = document.getElementById('logoCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const logoImg = new Image();
+  logoImg.src = 'assets/obomsoft_logo_2048.png';
+
+  // audio elements
+  const soundID = new Audio('assets/sound_id.wav');
+  const bgMusic = new Audio('assets/music1.wav');
+  bgMusic.loop = true;
+  bgMusic.volume = 0.55;
+
+  // helper to create a "Tocar" button if autoplay blocked
+  function showPlayButton(){
+    const btn = document.createElement('button');
+    btn.id = 'playSoundBtn';
+    btn.textContent = 'Tocar áudio / Iniciar';
+    btn.style.position = 'absolute';
+    btn.style.zIndex = 9999;
+    btn.style.left = '50%';
+    btn.style.top = '75%';
+    btn.style.transform = 'translate(-50%,-50%)';
+    btn.style.padding = '12px 18px';
+    btn.style.fontSize = '16px';
+    btn.style.borderRadius = '12px';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', async ()=>{
+      await tryPlayAudio(soundID).catch(()=>{});
+      await tryPlayAudio(bgMusic).catch(()=>{});
+      btn.remove();
+      proceedToGame();
+    });
+  }
+
+  function proceedToGame(){
+    splash.style.display='none';
+    document.getElementById('gameContainer').style.display='block';
+    if(!shown) localStorage.setItem(FIRST_RUN_KEY, '1');
+    startPhaserGame(); // existing function that initialises o Phaser
+  }
+
+  logoImg.onload = async ()=>{
+    // draw static logo once for fallback
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const w = canvas.width*0.9, h = canvas.height*0.7;
+    ctx.drawImage(logoImg, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+
+    if(shown){
+      // skip intro animation
+      proceedToGame();
+      return;
+    }
+
+    // try to play soundID and background music
+    const ok1 = await tryPlayAudio(soundID);
+    const ok2 = await tryPlayAudio(bgMusic);
+
+    // if autoplay blocked, show a big play button so user can start audio+game
+    if(!ok1 || !ok2){
+      showPlayButton();
+      // also animate the logo visually but wait for user interaction to unmute music
+      let start = performance.now();
+      function anim(t){
+        const dt = (t-start)/1000;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const g = ctx.createLinearGradient(0,0,0,canvas.height);
+        g.addColorStop(0,'#8fd3f4'); g.addColorStop(1,'#f6a6ff');
+        ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 0.95;
+        ctx.drawImage(logoImg, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+        // beam
+        ctx.fillStyle = 'rgba(255,255,255,'+ (0.06 + 0.04*Math.sin(dt*4)) +')';
+        ctx.fillRect(canvas.width*0.2, canvas.height*0.45, canvas.width*0.6, 6*Math.abs(Math.sin(dt*3)));
+        requestAnimationFrame(anim);
+      }
+      requestAnimationFrame(anim);
+    } else {
+      // autoplay worked — play intro animation for 3s then proceed
+      let t0 = performance.now();
+      function anim(t){
+        const dt = (t-t0)/1000;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const g = ctx.createLinearGradient(0,0,0,canvas.height);
+        g.addColorStop(0,'#8fd3f4'); g.addColorStop(1,'#f6a6ff');
+        ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(logoImg, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+        ctx.fillStyle = 'rgba(255,255,255,'+ (0.08*Math.abs(Math.sin(dt*4))) +')';
+        ctx.fillRect(canvas.width*0.2, canvas.height*0.45, canvas.width*0.6, 6*Math.abs(Math.sin(dt*3)));
+        if(dt < 3) requestAnimationFrame(anim); else proceedToGame();
+      }
+      requestAnimationFrame(anim);
+    }
+  };
+}
+// call showSplashThenStart() at the end of page load
+// --- END: audio-friendly splash ---
