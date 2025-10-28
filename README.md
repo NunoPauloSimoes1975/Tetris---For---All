@@ -1,0 +1,1 @@
+Tetris For All - Pixar Edition (Obomsoft)\n\nUpload the files to a GitHub repo 'tetris-for-all' and enable Pages (branch main / root).

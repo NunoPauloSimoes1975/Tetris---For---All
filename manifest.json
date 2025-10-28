@@ -1,0 +1,20 @@
+{
+  "name": "Tetris For All - Pixar Edition",
+  "short_name": "TetrisForAll",
+  "start_url": "/?source=homescreen",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#0f1b2b",
+  "icons": [
+    {
+      "src": "assets/obomsoft_logo_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/obomsoft_logo_2048.png",
+      "sizes": "2048x2048",
+      "type": "image/png"
+    }
+  ]
+}
