@@ -53,6 +53,26 @@ function showSplashThenStart() {
     document.getElementById('gameContainer').style.display='block';
     if(!shown) localStorage.setItem(FIRST_RUN_KEY, '1');
     startPhaserGame(); // existing function that initialises o Phaser
+    // dentro da scene em Phaser
+if(!this.gridGraphics) this.gridGraphics = this.add.graphics();
+this.gridGraphics.clear();
+// desenhar cada célula preenchida
+this.gridGraphics.fillStyle(0xffcc00, 1);
+for(let y=0;y<20;y++){
+  for(let x=0;x<10;x++){
+    if(grid[y][x]){
+      this.gridGraphics.fillRect(16 + x*32, 16 + y*32, 30, 30);
+    }
+  }
+}
+// desenhar peça atual
+this.gridGraphics.fillStyle(0x66ccff, 1);
+for(let ry=0; ry<current.h; ry++) for(let rx=0; rx<current.w; rx++){
+  if(current.shape[ry][rx]){
+    this.gridGraphics.fillRect(16 + (current.x+rx)*32, 16 + (current.y+ry)*32, 30, 30);
+  }
+}
+
   }
 
   logoImg.onload = async ()=>{
