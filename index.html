@@ -1,14 +1,1 @@
-<!doctype html><html lang="pt-PT"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tetris For All - Pixar Edition</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css"></head><body><div id="splash" class="splash"><canvas id="logoCanvas" width="800" height="400"></canvas></div><div id="gameContainer" <!-- cole dentro de #gameContainer -->
-<div id="sidePanel" class="sidePanel">
-  <button id="closePanel">×</button>
-  <h3>Opções</h3>
-  <label>Idioma:
-    <select id="langSelect"><option value="pt">PT</option><option value="en">EN</option></select>
-  </label>
-  <label>Skins:
-    <select id="skinSelect"><option value="classic">Classic</option><option value="gradient">Gradient</option></select>
-  </label>
-  <button id="toggleMusic">Música On/Off</button>
-</div>
-<button id="openPanel" class="openPanelBtn">⚙️</button>
-style="display:none;"><div id="cornerLogo"><img src="assets/obomsoft_logo_512.png" alt="Obomsoft"></div><div id="game"></div><div id="hud"></div><footer id="footerAd">BANNER (Anúncio de teste)</footer></div><script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script><script src="game.js"></script><script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('SW registered')).catch(()=>{});}</script></body></html>
+<!doctype html><html lang="pt-PT"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tetris For All - Pixar Edition</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css"></head><body><div id="splash" class="splash"><canvas id="logoCanvas" width="900" height="400"></canvas></div><div id="gameContainer" style="display:none"><div id="cornerLogo"><img src="assets/obomsoft_logo_512.png"></div><button id="openPanel" class="openPanelBtn">⚙️</button><div id="sidePanel" class="sidePanel hidden"><button id="closePanel">×</button><h3>Opções / Options</h3><label>Idioma:<select id="langSelect"><option value="pt" selected>Português</option><option value="en">English</option></select></label><label>Música:<button id="toggleMusic">Música On/Off</button></label><label>Tema:<button id="toggleTheme">Alternar Tema</button></label><hr><div id="helpBox"><h4>Ajuda / Help</h4><pre id="helpText">← → ↑ ↓ - Controlo das peças\nModo Infinito / Desafio\nUpload de Skins e GIFs</pre></div></div><div id="game"></div><div id="hud"></div><footer id="footerAd">BANNER (Anúncio de teste)</footer></div><script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script><script src="game_fixed.js"></script><script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}</script></body></html>
