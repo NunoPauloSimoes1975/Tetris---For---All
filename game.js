@@ -110,3 +110,9 @@ function showSplashThenStart() {
 }
 // call showSplashThenStart() at the end of page load
 // --- END: audio-friendly splash ---
+document.getElementById('openPanel').addEventListener('click', ()=> {
+  document.getElementById('sidePanel').classList.remove('hidden');
+});
+document.getElementById('closePanel').addEventListener('click', ()=> {
+  document.getElementById('sidePanel').classList.add('hidden');
+});
